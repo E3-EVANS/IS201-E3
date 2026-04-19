@@ -1,0 +1,110 @@
+body{
+    background-color: #212529;
+    color: #e9ecef;
+    margin: 10px;
+    padding: 10px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+.Ebox{
+    border: 10px solid;
+    margin: 1px 200px;
+    padding: 8px;
+    background-color: #343a40;
+    color: #e9ecef;
+    text-align: center;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    font-size: 50px;
+}
+
+.column-separator {
+  display: flex;
+  gap: 20px; 
+  background-color: #343a40; 
+  color: #e9ecef;            
+  padding: 20px;
+}
+
+.column1 {
+  flex: 1; 
+  display: flex;
+  flex-direction: column; 
+}
+
+.column2 {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; 
+  text-align: right;     
+}
+
+.column2 ul{
+  list-style-position: inside;
+  text-align: left;
+}
+
+.column3 {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+}
+
+.column3 ul {
+  padding-left: 20px;
+  list-style-position: inside;
+  text-align: left;
+}
+
+
+.side-img {
+  width: 100%;
+  max-width: 280px;  
+  height: auto;  
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.YT1 {
+  display: flex;
+  justify-content: center;
+}
+
+#BSand{
+  font-size: 30px;
+  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+#MDinn{
+  font-size: 30px;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+#RJord{
+  font-size: 30px;
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+#EYW{
+  max-width: 255px
+}
+
+nav {
+  text-align: center;
+}
+nav a {
+  color: #e9ecef;
+  text-decoration: none;
+}
+
+nav a:hover {
+  background-color: gray;
+}

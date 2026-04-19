@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <style>
+        /* --- LAYOUT STYLES --- */
+        body {
+            background-color: #212529; /* Darker background for contrast */
+            color: #e9ecef;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .column-separator {
+            display: flex;
+            gap: 20px; 
+            background-color: #343a40; 
+            color: #e9ecef;            
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+        }
+
+        .column1, .column2, .column3 {
+            flex: 1; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Left Column */
+        .column1 {
+            align-items: flex-start;
+        }
+
+        /* Right Column */
+        .column2 {
+            align-items: flex-end; 
+            text-align: right;     
+        }
+
+        /* Middle Column (Fixed centering) */
+        .column3 {
+            align-items: center;
+            text-align: center;
+        }
+
+        /* Fixed list spacing for column 3 */
+        .column3 ul {
+            text-align: left;
+            margin: 0 auto;
+            padding-left: 20px;
+        }
+
+        .side-img {
+            width: 100%;
+            max-width: 280px;  
+            height: auto;  
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        /* --- VIDEO STYLES --- */
+        .video-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 50px;
+        }
+
+        .video-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            max-width: 800px;
+            background: #000;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        iframe {
+            max-width: 100%;
+            border: none;
+        }
+
+        /* --- MINESWEEPER STYLES --- */
+        .game-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #343a40;
+            padding: 40px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+        }
+
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(10, 35px);
+            grid-template-rows: repeat(10, 35px);
+            gap: 2px;
+            background-color: #212529;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 20px;
+            border: 3px solid #495057;
+        }
+
+        .cell {
+            width: 35px;
+            height: 35px;
+            background-color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+            user-select: none;
+            font-size: 1.1rem;
+        }
+
+        .cell.revealed {
+            background-color: lightgreen;
+            color: #212529;
+            cursor: default;
+        }
+
+        .cell.mine {
+            background-color: #dc3545;
+        }
+
+        .cell.flagged {
+            background-color: #ffc107;
+            color: #212529;
+        }
+
+        #status {
+            margin-top: 15px;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #e9ecef;
+            color: #212529;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #0b5ed7;
+        }
+
+        #REDD {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="game-section">
+        <h2>Minesweeper - it's like Minecraft but with <span id="REDD">bombs</span></h2>
+        <p>Right-click to place a flag (🚩). Left-click to reveal a tile.</p>
+        <div id="status">Ready to play!</div>
+        <div id="game-board"></div>
+        <button class="btn" onclick="startGame()">Reset Game</button>
+    </div>
+
+</div>
+
+<script>
+    const size = 10;
+    const mineCount = 15;
+    let board = [];
+    const boardElement = document.getElementById('game-board');
+    const statusElement = document.getElementById('status');
+
+    function startGame() {
+        board = [];
+        boardElement.innerHTML = '';
+        statusElement.innerText = "Quick, find the 15 mines before a TA sees you doing this in class!";
+        
+        // Initialize board
+        for (let r = 0; r < size; r++) {
+            board[r] = [];
+            for (let c = 0; c < size; c++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                
+                // Left Click
+                cell.addEventListener('click', () => revealCell(r, c));
+                
+                // Right Click (Flagging)
+                cell.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    toggleFlag(r, c);
+                });
+                
+                boardElement.appendChild(cell);
+                board[r][c] = {
+                    mine: false,
+                    revealed: false,
+                    flagged: false,
+                    element: cell
+                };
+            }
+        }
+
+        // Place mines randomly
+        let placedMines = 0;
+        while (placedMines < mineCount) {
+            let r = Math.floor(Math.random() * size);
+            let c = Math.floor(Math.random() * size);
+            if (!board[r][c].mine) {
+                board[r][c].mine = true;
+                placedMines++;
+            }
+        }
+
+        // Auto-Reveal Safe Start
+        autoRevealStart();
+    }
+
+    function toggleFlag(r, c) {
+        let cell = board[r][c];
+        if (cell.revealed) return;
+
+        cell.flagged = !cell.flagged;
+        if (cell.flagged) {
+            cell.element.classList.add('flagged');
+            cell.element.innerText = '🚩';
+        } else {
+            cell.element.classList.remove('flagged');
+            cell.element.innerText = '';
+        }
+    }
+
+    function revealCell(r, c) {
+        let cell = board[r][c];
+        if (cell.revealed || cell.flagged) return;
+
+        cell.revealed = true;
+        cell.element.classList.add('revealed');
+
+        if (cell.mine) {
+            cell.element.classList.add('mine');
+            cell.element.innerText = '💣';
+            gameOver(false);
+            return;
+        }
+
+        let minesAround = countMinesAround(r, c);
+        if (minesAround > 0) {
+            cell.element.innerText = minesAround;
+            // Basic color coding for numbers
+            const colors = ['', 'blue', 'green', 'red', 'purple', 'maroon', 'turquoise', 'black', 'gray'];
+            cell.element.style.color = colors[minesAround];
+        } else {
+            // Flood fill for empty spaces
+            for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                    if (r + dr >= 0 && r + dr < size && c + dc >= 0 && c + dc < size) {
+                        revealCell(r + dr, c + dc);
+                    }
+                }
+            }
+        }
+        checkWin();
+    }
+
+    function countMinesAround(r, c) {
+        let count = 0;
+        for (let dr = -1; dr <= 1; dr++) {
+            for (let dc = -1; dc <= 1; dc++) {
+                if (r + dr >= 0 && r + dr < size && c + dc >= 0 && c + dc < size) {
+                    if (board[r + dr][c + dc].mine) count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    function autoRevealStart() {
+        let revealed = false;
+        let attempts = 0;
+        while (!revealed && attempts < 500) {
+            const r = Math.floor(Math.random() * (size - 2)) + 1;
+            const c = Math.floor(Math.random() * (size - 2)) + 1;
+            let cluster = [];
+            for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                    cluster.push({ r: r + dr, c: c + dc });
+                }
+            }
+            let safeCells = cluster.filter(p => !board[p.r][p.c].mine);
+            if (safeCells.length >= 7) {
+                for (let i = 0; i < 7; i++) {
+                    revealCell(safeCells[i].r, safeCells[i].c);
+                }
+                revealed = true;
+            }
+            attempts++;
+        }
+    }
+
+    function checkWin() {
+        let revealedCount = 0;
+        for (let r = 0; r < size; r++) {
+            for (let c = 0; c < size; c++) {
+                if (board[r][c].revealed) revealedCount++;
+            }
+        }
+        if (revealedCount === (size * size) - mineCount) {
+            gameOver(true);
+        }
+    }
+
+    function gameOver(won) {
+        statusElement.innerText = won ? "Victory! 🎉" : "Boom! Game Over 💥";
+        for (let r = 0; r < size; r++) {
+            for (let c = 0; c < size; c++) {
+                if (board[r][c].mine) {
+                    board[r][c].element.innerText = '💣';
+                    board[r][c].element.classList.add('revealed');
+                    if (!won) board[r][c].element.classList.add('mine');
+                }
+            }
+        }
+    }
+
+    startGame();
+</script>
+
+</body>
+</html>
